@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="description" content="Androidcolorpicker : ">
+
+    <link rel="stylesheet" type="text/css" media="screen" href="stylesheets/stylesheet.css">
+
+    <title>Androidcolorpicker</title>
+  </head>
+
+  <body>
+
+    <!-- HEADER -->
+    <div id="header_wrap" class="outer">
+        <header class="inner">
+          <a id="forkme_banner" href="https://github.com/mrmojtabaa/AndroidColorPicker">View on GitHub</a>
+
+          <h1 id="project_title">Androidcolorpicker</h1>
+          <h2 id="project_tagline"></h2>
+
+            <section id="downloads">
+              <a class="zip_download_link" href="https://github.com/mrmojtabaa/AndroidColorPicker/zipball/master">Download this project as a .zip file</a>
+              <a class="tar_download_link" href="https://github.com/mrmojtabaa/AndroidColorPicker/tarball/master">Download this project as a tar.gz file</a>
+            </section>
+        </header>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="main_content_wrap" class="outer">
+      <section id="main_content" class="inner">
+        <h1>
+<a name="androidcolorpicker" class="anchor" href="#androidcolorpicker"><span class="octicon octicon-link"></span></a>AndroidColorPicker</h1>
+
+<h1></h1>
+
+<p><img src="http://www.xum.ir/images/2014/08/09/parangColorPicker-1.md.png" alt="ParangColorPicker"><img src="http://www.xum.ir/images/2014/08/09/parangColorPicker-2.md.png" alt="ParangColorPicker"></p>
+
+<h2>
+<a name="using-color-picker" class="anchor" href="#using-color-picker"><span class="octicon octicon-link"></span></a>Using Color picker</h2>
+
+<h1></h1>
+
+<p>Include this project in libraries of your project and write this code in your activity</p>
+
+<pre><code>   ParangColorPicker pcp = new ParangColorPicker(MainActivity.this,false,
+    new ParangColorPicker.ParangColorPickerListener() {
+
+                        @Override
+                        public void onCancel() {
+
+                        }
+
+                        @Override
+                        public void onOk(int color) {
+                                                        // your selected color is here
+                        }
+                    });
+pcp.show(Color.BLUE);
+</code></pre>
+      </section>
+    </div>
+
+    <!-- FOOTER  -->
+    <div id="footer_wrap" class="outer">
+      <footer class="inner">
+        <p class="copyright">Androidcolorpicker maintained by <a href="https://github.com/mrmojtabaa">mrmojtabaa</a></p>
+        <p>Published with <a href="http://pages.github.com">GitHub Pages</a></p>
+      </footer>
+    </div>
+
+    
+
+  </body>
+</html>
