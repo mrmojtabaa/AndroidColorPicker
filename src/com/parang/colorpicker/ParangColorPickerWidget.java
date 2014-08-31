@@ -1,6 +1,5 @@
 ﻿package com.parang.colorpicker;
 
-import android.R.string;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -79,7 +78,6 @@ public class ParangColorPickerWidget extends RelativeLayout {
 					mSelectedColor.setBackgroundColor(SelectedColor);
 
 				} catch (Exception e) {
-					// TODO: handle exception
 				}
 
 			}
