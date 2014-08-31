@@ -1,53 +1,52 @@
 ﻿package com.parang.colorpicker;
 
-import java.util.ArrayList;
-import java.util.List;
+import android.R.string;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
-import android.widget.Spinner;
 
 public class ParangColorPickerWidget extends RelativeLayout {
 
 	private String[] ColorsValue = { "#FFFFFF", "#000000", "#0099CC",
 			"#AA66CC", "#99CC00", "#FF8800", "#FF4444", "#CC0000" };
-	private String[] PersianColorsName = { "سفید", "سیاه", "آبی", "بنفش",
-			"سبز", "نارنجی", "قرمز","زرشکی" };
-	private String[] ColorsName = { "White", "Black", "Blue", "Violet",
-			"Green", "Orang", "Red","Purple" };
 
 	private Context context;
 	private ImageView mColorArea, mSelectedColor;
-	private Spinner mColorsList;
-	private List<KeyValue> ColorsList = new ArrayList<KeyValue>();
-	private KeyValue color;
 	private int DefaultColor, SelectedColor;
-	private boolean IsPersian;
+	private EditText ColorHexEditText;
 
 	private OnTouchListener ColorAreaOnTouchListener;
-	private OnItemSelectedListener SpinnerOnItemSelectedListener;
+	boolean IsPersian = false;
+
+	LinearLayout DefaultColorsPanelLinearLayout;
+	OnClickListener DefaultColorClickListener;
 
 	public ParangColorPickerWidget(Context context, AttributeSet attrs) {
 		super(context, attrs);
 		this.context = context;
-		
+
 		LayoutInflater inflater = (LayoutInflater) context
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		inflater.inflate(R.layout.custom_color_picker, this, true);
 
 		mSelectedColor = (ImageView) findViewById(R.id.ccpSelectedColor);
 		mColorArea = (ImageView) findViewById(R.id.ccpColorArea);
-		mColorsList = (Spinner) findViewById(R.id.ColorsListSpinner);
+
+		DefaultColorsPanelLinearLayout = (LinearLayout) findViewById(R.id.DefaultColorsPanelLinearLayout);
+		ColorHexEditText = (EditText) findViewById(R.id.ColorHexEditText);
 
 		// TypedArray mtypedArray = context.obtainStyledAttributes(attrs,
 		// R.styleable.ColorPickerOptions, 0, 0);
@@ -63,30 +62,39 @@ public class ParangColorPickerWidget extends RelativeLayout {
 		// R.styleable.ColorPickerOptions_PersianMode, false);
 		// mtypedArray.recycle();
 
-		SpinnerOnItemSelectedListener = new OnItemSelectedListener() {
-
-			@Override
-			public void onItemSelected(AdapterView<?> arg0, View arg1,
-					int position, long arg3) {
-
-				SelectedColor = Color.parseColor(ColorsValue[position]);
-				mSelectedColor.setBackgroundColor(SelectedColor);
-
-			}
-
-			@Override
-			public void onNothingSelected(AdapterView<?> arg0) {
-			}
-		};
-
-
 		SelectedColor = DefaultColor;
 		mSelectedColor.setBackgroundColor(SelectedColor);
-		mColorsList.setSelection(
-				GetColoIndex(Color.red(DefaultColor),
-						Color.green(DefaultColor), Color.blue(DefaultColor)),
-				false);
-		mColorsList.setOnItemSelectedListener(SpinnerOnItemSelectedListener);
+		ColorHexEditText.setText(String.format("#%06X",
+				(0xFFFFFF & SelectedColor)));
+
+		ColorHexEditText.addTextChangedListener(new TextWatcher() {
+
+			@Override
+			public void onTextChanged(CharSequence HexColor, int arg1,
+					int arg2, int arg3) {
+				
+				try {
+
+					SelectedColor = Color.parseColor(HexColor.toString());
+					mSelectedColor.setBackgroundColor(SelectedColor);
+
+				} catch (Exception e) {
+					// TODO: handle exception
+				}
+
+			}
+
+			@Override
+			public void beforeTextChanged(CharSequence arg0, int arg1,
+					int arg2, int arg3) {
+
+			}
+
+			@Override
+			public void afterTextChanged(Editable arg0) {
+
+			}
+		});
 
 		ColorAreaOnTouchListener = new OnTouchListener() {
 
@@ -95,12 +103,12 @@ public class ParangColorPickerWidget extends RelativeLayout {
 
 				int x = (int) event.getX();
 				int y = (int) event.getY();
-				Log.d("x y ", String.valueOf(x)+" "+String.valueOf(y));
+				Log.d("x y ", String.valueOf(x) + " " + String.valueOf(y));
 
 				ImageView mColorAreaView = ((ImageView) ColorAreaView);
 				Bitmap bitmap = ((BitmapDrawable) mColorAreaView.getDrawable())
 						.getBitmap();
-				int pixel=0;
+				int pixel = 0;
 				try {
 					pixel = bitmap.getPixel(x, y);
 				} catch (Exception e) {
@@ -116,45 +124,68 @@ public class ParangColorPickerWidget extends RelativeLayout {
 				}
 
 				int mycolor = Color.rgb(redValue, greenValue, blueValue);
-				mColorsList.setSelection(GetColoIndex(redValue, greenValue,
-						blueValue));
-				SelectedColor = mycolor;
-				mSelectedColor.setBackgroundColor(SelectedColor);
 
-				// switch (event.getAction()) {
-				// case MotionEvent.ACTION_DOWN:
-				// case MotionEvent.ACTION_MOVE:
-				// case MotionEvent.ACTION_UP:
-				// }
-				//
+				ColorHexEditText.setText(String.format("#%06X",
+						(0xFFFFFF & mycolor)));
+
 				return true;
 			}
 		};
-
 		mColorArea.setOnTouchListener(ColorAreaOnTouchListener);
+
+		DefaultColorClickListener = new OnClickListener() {
+
+			@Override
+			public void onClick(View view) {
+				ColorHexEditText.setText(String.format("#%06X",
+						(0xFFFFFF & (Integer) ((Button) view).getTag())));
+			}
+		};
+
+		initDefaultColors();
 
 	}
 
-	private int GetColoIndex(int red, int green, int blue) {
-		double minval = 1000000000;
-		int minIndex = -1;
-		int mRed, mGreen, mBlue;
-		int color;
+	// private int GetColoIndex(int red, int green, int blue) {
+	// double minval = 1000000000;
+	// int minIndex = -1;
+	// int mRed, mGreen, mBlue;
+	// int color;
+	//
+	// for (int i = 0; i < ColorsValue.length; i++) {
+	// color = Color.parseColor(ColorsValue[i]);
+	// mRed = Color.red(color);
+	// mGreen = Color.green(color);
+	// mBlue = Color.blue(color);
+	// if (Math.sqrt((mRed - red) * (mRed - red) + (mGreen - green)
+	// * (mGreen - green) + (mBlue - blue) * (mBlue - blue)) < minval) {
+	// minval = Math.sqrt((mRed - red) * (mRed - red)
+	// + (mGreen - green) * (mGreen - green) + (mBlue - blue)
+	// * (mBlue - blue));
+	// minIndex = i;
+	// }
+	// }
+	// return minIndex;
+	// }
+
+	public void initDefaultColors() {
+		// DefaultColorsPanelLinearLayout.addView(child);
+		Button button;
 
 		for (int i = 0; i < ColorsValue.length; i++) {
-			color = Color.parseColor(ColorsValue[i]);
-			mRed = Color.red(color);
-			mGreen = Color.green(color);
-			mBlue = Color.blue(color);
-			if (Math.sqrt((mRed - red) * (mRed - red) + (mGreen - green)
-					* (mGreen - green) + (mBlue - blue) * (mBlue - blue)) < minval) {
-				minval = Math.sqrt((mRed - red) * (mRed - red)
-						+ (mGreen - green) * (mGreen - green) + (mBlue - blue)
-						* (mBlue - blue));
-				minIndex = i;
-			}
+
+			button = new Button(context);
+			button.setBackgroundColor(Color.parseColor(ColorsValue[i]));
+			// button.setOnTouchListener(DefaultColorClickListener);
+			button.setOnClickListener(DefaultColorClickListener);
+			// button.setId();
+			button.setTag(Color.parseColor(ColorsValue[i]));
+			button.setLayoutParams(new android.widget.LinearLayout.LayoutParams(
+					100, 100, 1));
+
+			DefaultColorsPanelLinearLayout.addView(button);
 		}
-		return minIndex;
+
 	}
 
 	public int getColor() {
@@ -165,30 +196,17 @@ public class ParangColorPickerWidget extends RelativeLayout {
 		DefaultColor = defaultColor;
 		SelectedColor = defaultColor;
 		mSelectedColor.setBackgroundColor(SelectedColor);
-		mColorsList.setSelection(
-				GetColoIndex(Color.red(DefaultColor),
-						Color.green(DefaultColor), Color.blue(DefaultColor)),
-				false);
+		ColorHexEditText.setText(String.format("#%06X",
+				(0xFFFFFF & SelectedColor)));
+
 	}
 
 	public void PersianMode(boolean IsPersian) {
 		this.IsPersian = IsPersian;
-		
-		ColorsList.clear();
+
 		for (int i = 0; i < ColorsValue.length; i++) {
 			Log.d("widget", String.valueOf(IsPersian));
-			if (this.IsPersian) {
-				color = new KeyValue(Color.parseColor(ColorsValue[i]),
-						PersianColorsName[i]);
-			} else {
-				color = new KeyValue(Color.parseColor(ColorsValue[i]),
-						ColorsName[i]);
-			}
-			ColorsList.add(color);
+
 		}
-		SpinnerListAdapter ColorsListAdapter = new SpinnerListAdapter(context,
-				ColorsList);
-		mColorsList.setAdapter(ColorsListAdapter);
-		
 	}
 }
